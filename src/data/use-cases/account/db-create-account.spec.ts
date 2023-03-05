@@ -28,12 +28,12 @@ function makeSut() {
 }
 
 describe('DbCreateAccount use case', () => {
-  test('Deveria chamar o CreateAccountRepository com os valores corretos', () => {
+  test('Deveria chamar o CreateAccountRepository com os valores corretos', async () => {
     const { sut, createAccountRepositoryStub } = makeSut();
 
     jest.spyOn(createAccountRepositoryStub, 'create');
 
-    sut.create({
+    await sut.create({
       name: 'any_name',
       email: 'any_email@mail.com',
       password: 'any_password'
@@ -44,5 +44,22 @@ describe('DbCreateAccount use case', () => {
       email: 'any_email@mail.com',
       password: 'any_password'
     });
+  });
+
+  test('Deveria lançar erro se o CreateAccountRepository lançar um erro', async () => {
+    const { sut, createAccountRepositoryStub } = makeSut();
+
+    jest.spyOn(createAccountRepositoryStub, 'create')
+      .mockReturnValueOnce(
+        new Promise((resolve, reject) => reject(new Error()))
+      );
+
+    const promise = sut.create({
+      name: 'any_name',
+      email: 'any_email@mail.com',
+      password: 'any_password'
+    });
+
+    await expect(promise).rejects.toThrow();
   });
 });
