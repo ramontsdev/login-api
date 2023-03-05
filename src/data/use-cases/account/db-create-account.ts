@@ -9,9 +9,8 @@ export class DbCreateAccount implements CreateAccount {
     private readonly createAccountRepository: CreateAccountRepository
   ) { }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   async create(accountData: CreateAccountModel): Promise<AccountModel> {
-    await this.createAccountRepository.create(accountData);
+    const account = await this.createAccountRepository.create(accountData);
+    return account;
   }
 }

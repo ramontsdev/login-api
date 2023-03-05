@@ -62,4 +62,21 @@ describe('DbCreateAccount use case', () => {
 
     await expect(promise).rejects.toThrow();
   });
+
+  test('Deveria retornar uma conta em caso de sucesso', async () => {
+    const { sut } = makeSut();
+
+    const account = await sut.create({
+      name: 'any_name',
+      email: 'any_email@mail.com',
+      password: 'any_password'
+    });
+
+    expect(account).toEqual({
+      id: 'any_id',
+      name: 'any_name',
+      email: 'any_email@mail.com',
+      password: 'any_password'
+    });
+  });
 });
