@@ -10,7 +10,7 @@ function makeSut() {
 }
 
 describe('SignIn Controller', () => {
-  test('Deveria retornar badRequest caso e-mail não seja passado', async () => {
+  test('Deveria retornar badRequest caso e-mail não for passado', async () => {
     const { sut } = makeSut();
 
     const httpResponse = await sut.handle({
@@ -20,5 +20,17 @@ describe('SignIn Controller', () => {
     });
 
     expect(httpResponse).toEqual(badRequest(new MissingParamError('email')));
+  });
+
+  test('Deveria retornar badRequest caso password não for passado', async () => {
+    const { sut } = makeSut();
+
+    const httpResponse = await sut.handle({
+      body: {
+        email: 'any_email@mail.com'
+      }
+    });
+
+    expect(httpResponse).toEqual(badRequest(new MissingParamError('password')));
   });
 });
