@@ -172,4 +172,23 @@ describe('SignUp Controller', () => {
       password: 'any_password'
     });
   });
+
+  test('Deveria retornar um statusCode 500 se o CreateAccount lançar um erro', async () => {
+    const { sut, createAccountStub } = makeSut();
+    jest.spyOn(createAccountStub, 'create')
+      .mockReturnValueOnce(
+        new Promise((resolve, reject) => reject(new Error))
+      );
+
+    const httpResponse = await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(serverError(new ServerError()));
+  });
 });
