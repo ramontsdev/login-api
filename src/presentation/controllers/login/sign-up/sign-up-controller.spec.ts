@@ -1,10 +1,11 @@
 import { AccountModel } from '../../../../domain/models/account-model';
 import { CreateAccountModel } from '../../../../domain/models/create-account-model';
 import { CreateAccount } from '../../../../domain/use-cases/create-account';
+import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { ServerError } from '../../../errors/server-error';
-import { badRequest, created, serverError } from '../../../helpers/http-helpers';
+import { badRequest, created, serverError, unprocessableEntity } from '../../../helpers/http-helpers';
 import { EmailValidator } from '../../../protocols/email-validator';
 import { SignUpController } from './sign-up-controller';
 
@@ -15,15 +16,20 @@ const fakeAccount = {
   password: 'any_password'
 };
 
+function makeGetAccountByEmail() {
+  class GetAccountByEmailStub implements GetAccountByEmail {
+    async getByEmail(email: string): Promise<AccountModel | null> {
+      return null;
+    }
+  }
+
+  return new GetAccountByEmailStub();
+}
+
 function makeCreateAccount() {
   class CreateAccountStub implements CreateAccount {
     async create(accountData: CreateAccountModel): Promise<AccountModel> {
-      return {
-        id: 'any_id',
-        name: 'any_name',
-        email: 'any_email@mail.com',
-        password: 'any_password'
-      };
+      return fakeAccount;
     }
   }
 
@@ -43,11 +49,13 @@ function makeEmailValidator() {
 function makeSut() {
   const emailValidatorStub = makeEmailValidator();
   const createAccountStub = makeCreateAccount();
-  const sut = new SignUpController(emailValidatorStub, createAccountStub);
+  const getAccountByEmailStub = makeGetAccountByEmail();
+  const sut = new SignUpController(emailValidatorStub, createAccountStub, getAccountByEmailStub);
   return {
     sut,
     emailValidatorStub,
-    createAccountStub
+    createAccountStub,
+    getAccountByEmailStub
   };
 }
 
@@ -197,6 +205,40 @@ describe('SignUp Controller', () => {
     });
 
     expect(httpResponse).toEqual(serverError(new ServerError()));
+  });
+
+  test('Deveria chamar GetAccountByEmail com o valor correto', async () => {
+    const { sut, getAccountByEmailStub } = makeSut();
+    jest.spyOn(getAccountByEmailStub, 'getByEmail');
+
+    await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(getAccountByEmailStub.getByEmail).toBeCalledWith('any_email@mail.com');
+  });
+
+  test('Deveria retornar statusCode 422 se GetAccountByEmail retornar uma conta', async () => {
+    const { sut, getAccountByEmailStub } = makeSut();
+    jest.spyOn(getAccountByEmailStub, 'getByEmail').mockReturnValueOnce(
+      new Promise(resolve => resolve(fakeAccount))
+    );
+
+    const httpResponse = await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(unprocessableEntity(new Error('Email already in use')));
   });
 
   test('Deveria retornar um statusCode 201 em caso de sucesso', async () => {

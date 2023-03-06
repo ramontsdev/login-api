@@ -20,3 +20,10 @@ export function created(data: any): HttpResponse {
     body: data
   };
 }
+
+export function unprocessableEntity(error: Error): HttpResponse {
+  return {
+    statusCode: 422,
+    body: error
+  };
+}
