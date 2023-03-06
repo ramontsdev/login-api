@@ -2,7 +2,7 @@ import { CreateAccount } from '../../../../domain/use-cases/create-account';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { ServerError } from '../../../errors/server-error';
-import { badRequest, serverError } from '../../../helpers/http-helpers';
+import { badRequest, created, serverError } from '../../../helpers/http-helpers';
 import { Controller } from '../../../protocols/controller';
 import { EmailValidator } from '../../../protocols/email-validator';
 import { HttpRequest, HttpResponse } from '../../../protocols/http';
@@ -14,8 +14,6 @@ export class SignUpController implements Controller {
     private readonly createAccount: CreateAccount
   ) { }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
       const requiredFields = ['name', 'email', 'password', 'passwordConfirmation'];
@@ -33,9 +31,11 @@ export class SignUpController implements Controller {
         return badRequest(new InvalidParamError('email'));
       }
 
-      await this.createAccount.create({
+      const account = await this.createAccount.create({
         name, email, password
       });
+
+      return created(account);
     } catch (error) {
       return serverError(new ServerError());
     }

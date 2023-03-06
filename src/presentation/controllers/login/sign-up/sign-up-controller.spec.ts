@@ -4,9 +4,16 @@ import { CreateAccount } from '../../../../domain/use-cases/create-account';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { ServerError } from '../../../errors/server-error';
-import { badRequest, serverError } from '../../../helpers/http-helpers';
+import { badRequest, created, serverError } from '../../../helpers/http-helpers';
 import { EmailValidator } from '../../../protocols/email-validator';
 import { SignUpController } from './sign-up-controller';
+
+const fakeAccount = {
+  id: 'any_id',
+  name: 'any_name',
+  email: 'any_email@mail.com',
+  password: 'any_password'
+};
 
 function makeCreateAccount() {
   class CreateAccountStub implements CreateAccount {
@@ -190,5 +197,20 @@ describe('SignUp Controller', () => {
     });
 
     expect(httpResponse).toEqual(serverError(new ServerError()));
+  });
+
+  test('Deveria retornar um statusCode 201 em caso de sucesso', async () => {
+    const { sut } = makeSut();
+
+    const httpResponse = await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(created(fakeAccount));
   });
 });

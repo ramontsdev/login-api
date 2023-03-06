@@ -13,3 +13,10 @@ export function serverError(error: Error): HttpResponse {
     body: error
   };
 }
+
+export function created(data: any): HttpResponse {
+  return {
+    statusCode: 201,
+    body: data
+  };
+}
