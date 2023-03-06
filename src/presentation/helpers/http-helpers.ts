@@ -27,3 +27,10 @@ export function unprocessableEntity(error: Error): HttpResponse {
     body: error
   };
 }
+
+export function notFound(error: Error): HttpResponse {
+  return {
+    statusCode: 404,
+    body: error
+  };
+}

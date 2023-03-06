@@ -1,7 +1,8 @@
 import { AccountModel } from '../../../../domain/models/account-model';
 import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
 import { MissingParamError } from '../../../errors/missing-param-error';
-import { badRequest } from '../../../helpers/http-helpers';
+import { NotFoundError } from '../../../errors/not-found-error';
+import { badRequest, notFound } from '../../../helpers/http-helpers';
 import { SignInController } from './sign-in-controller';
 
 const fakeAccount = {
@@ -66,5 +67,22 @@ describe('SignIn Controller', () => {
     });
 
     expect(getAccountByEmailStub.getByEmail).toBeCalledWith('any_email@mail.com');
+  });
+
+  test('Deveria retornar 404 se o GetAccountByEmail retornar null', async () => {
+    const { sut, getAccountByEmailStub } = makeSut();
+    jest.spyOn(getAccountByEmailStub, 'getByEmail')
+      .mockReturnValueOnce(
+        new Promise(resolve => resolve(null))
+      );
+
+    const httpResponse = await sut.handle({
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(notFound(new NotFoundError('any_email@mail.com')));
   });
 });
