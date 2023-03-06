@@ -30,4 +30,18 @@ describe('SignUp Controller', () => {
 
     expect(httpResponse).toEqual(badRequest(new MissingParamError('email')));
   });
+
+  test('Deveria retornar statusCode 400 se o password não for passado', async () => {
+    const sut = new SignUpController();
+
+    const httpResponse = await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(badRequest(new MissingParamError('password')));
+  });
 });
