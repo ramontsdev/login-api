@@ -1,9 +1,27 @@
+import { AccountModel } from '../../../../domain/models/account-model';
+import { CreateAccountModel } from '../../../../domain/models/create-account-model';
+import { CreateAccount } from '../../../../domain/use-cases/create-account';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { ServerError } from '../../../errors/server-error';
 import { badRequest, serverError } from '../../../helpers/http-helpers';
 import { EmailValidator } from '../../../protocols/email-validator';
 import { SignUpController } from './sign-up-controller';
+
+function makeCreateAccount() {
+  class CreateAccountStub implements CreateAccount {
+    async create(accountData: CreateAccountModel): Promise<AccountModel> {
+      return {
+        id: 'any_id',
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      };
+    }
+  }
+
+  return new CreateAccountStub();
+}
 
 function makeEmailValidator() {
   class EmailValidatorStub implements EmailValidator {
@@ -17,10 +35,12 @@ function makeEmailValidator() {
 
 function makeSut() {
   const emailValidatorStub = makeEmailValidator();
-  const sut = new SignUpController(emailValidatorStub);
+  const createAccountStub = makeCreateAccount();
+  const sut = new SignUpController(emailValidatorStub, createAccountStub);
   return {
     sut,
-    emailValidatorStub
+    emailValidatorStub,
+    createAccountStub
   };
 }
 
@@ -131,5 +151,25 @@ describe('SignUp Controller', () => {
     });
 
     expect(httpRequest).toEqual(serverError(new ServerError()));
+  });
+
+  test('Deveria chamar o CreateAccount com os valores corretos', async () => {
+    const { sut, createAccountStub } = makeSut();
+    jest.spyOn(createAccountStub, 'create');
+
+    await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(createAccountStub.create).toBeCalledWith({
+      name: 'any_name',
+      email: 'any_email@mail.com',
+      password: 'any_password'
+    });
   });
 });

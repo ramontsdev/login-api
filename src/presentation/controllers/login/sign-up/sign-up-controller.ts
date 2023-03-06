@@ -1,3 +1,4 @@
+import { CreateAccount } from '../../../../domain/use-cases/create-account';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { ServerError } from '../../../errors/server-error';
@@ -9,7 +10,8 @@ import { HttpRequest, HttpResponse } from '../../../protocols/http';
 export class SignUpController implements Controller {
 
   constructor(
-    private readonly emailValidator: EmailValidator
+    private readonly emailValidator: EmailValidator,
+    private readonly createAccount: CreateAccount
   ) { }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -24,12 +26,16 @@ export class SignUpController implements Controller {
         }
       }
 
-      const { email } = httpRequest.body;
+      const { email, name, password } = httpRequest.body;
 
       const isValid = this.emailValidator.isValid(email);
       if (!isValid) {
         return badRequest(new InvalidParamError('email'));
       }
+
+      await this.createAccount.create({
+        name, email, password
+      });
     } catch (error) {
       return serverError(new ServerError());
     }
