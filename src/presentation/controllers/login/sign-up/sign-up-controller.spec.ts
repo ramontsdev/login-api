@@ -1,5 +1,6 @@
 import { AccountModel } from '../../../../domain/models/account-model';
 import { CreateAccountModel } from '../../../../domain/models/create-account-model';
+import { Authenticator } from '../../../../domain/use-cases/authenticator';
 import { CreateAccount } from '../../../../domain/use-cases/create-account';
 import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
@@ -16,14 +17,14 @@ const fakeAccount = {
   password: 'any_password'
 };
 
-function makeGetAccountByEmail() {
-  class GetAccountByEmailStub implements GetAccountByEmail {
-    async getByEmail(email: string): Promise<AccountModel | null> {
-      return null;
+function makeEmailValidator() {
+  class EmailValidatorStub implements EmailValidator {
+    isValid(email: string): boolean {
+      return true;
     }
   }
 
-  return new GetAccountByEmailStub();
+  return new EmailValidatorStub();
 }
 
 function makeCreateAccount() {
@@ -36,26 +37,37 @@ function makeCreateAccount() {
   return new CreateAccountStub();
 }
 
-function makeEmailValidator() {
-  class EmailValidatorStub implements EmailValidator {
-    isValid(email: string): boolean {
-      return true;
+function makeGetAccountByEmail() {
+  class GetAccountByEmailStub implements GetAccountByEmail {
+    async getByEmail(email: string): Promise<AccountModel | null> {
+      return null;
     }
   }
 
-  return new EmailValidatorStub();
+  return new GetAccountByEmailStub();
+}
+
+function makeAuthenticator() {
+  class AuthenticatorStub implements Authenticator {
+    async auth(value: any): Promise<string> {
+      return 'access_token';
+    }
+  }
+  return new AuthenticatorStub();
 }
 
 function makeSut() {
   const emailValidatorStub = makeEmailValidator();
   const createAccountStub = makeCreateAccount();
   const getAccountByEmailStub = makeGetAccountByEmail();
-  const sut = new SignUpController(emailValidatorStub, createAccountStub, getAccountByEmailStub);
+  const authenticatorStub = makeAuthenticator();
+  const sut = new SignUpController(emailValidatorStub, createAccountStub, getAccountByEmailStub, authenticatorStub);
   return {
     sut,
     emailValidatorStub,
     createAccountStub,
-    getAccountByEmailStub
+    getAccountByEmailStub,
+    authenticatorStub
   };
 }
 
@@ -241,6 +253,27 @@ describe('SignUp Controller', () => {
     expect(httpResponse).toEqual(unprocessableEntity(new Error('Email already in use')));
   });
 
+  test('Deveria retornar statusCode 500 se o Authenticator lançar erro', async () => {
+    const { sut, authenticatorStub } = makeSut();
+    jest.spyOn(authenticatorStub, 'auth')
+      .mockReturnValueOnce(
+        new Promise((resolve, reject) => reject(new Error()))
+      );
+
+    const httpResponse = await sut.handle({
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(serverError(new ServerError()));
+  });
+
+
+
   test('Deveria retornar um statusCode 201 em caso de sucesso', async () => {
     const { sut } = makeSut();
 
@@ -253,6 +286,6 @@ describe('SignUp Controller', () => {
       }
     });
 
-    expect(httpResponse).toEqual(created(fakeAccount));
+    expect(httpResponse).toEqual(created({ accessToken: 'access_token' }));
   });
 });

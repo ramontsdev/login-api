@@ -1,3 +1,4 @@
+import { Authenticator } from '../../../../domain/use-cases/authenticator';
 import { CreateAccount } from '../../../../domain/use-cases/create-account';
 import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
 import { InvalidParamError } from '../../../errors/invalid-param-error';
@@ -13,7 +14,8 @@ export class SignUpController implements Controller {
   constructor(
     private readonly emailValidator: EmailValidator,
     private readonly createAccount: CreateAccount,
-    private readonly getAccountByEmail: GetAccountByEmail
+    private readonly getAccountByEmail: GetAccountByEmail,
+    private readonly authenticator: Authenticator
   ) { }
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
@@ -42,7 +44,9 @@ export class SignUpController implements Controller {
         name, email, password
       });
 
-      return created(newAccount);
+      const accessToken = await this.authenticator.auth(newAccount.id);
+
+      return created({ accessToken });
     } catch (error) {
       return serverError(new ServerError());
     }
