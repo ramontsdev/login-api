@@ -6,7 +6,7 @@ import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { NotFoundError } from '../../../errors/not-found-error';
 import { ServerError } from '../../../errors/server-error';
-import { badRequest, notFound, serverError } from '../../../helpers/http-helpers';
+import { badRequest, notFound, ok, serverError } from '../../../helpers/http-helpers';
 import { SignInController } from './sign-in-controller';
 
 const fakeAccount = {
@@ -228,5 +228,18 @@ describe('SignIn Controller', () => {
 
       expect(httpResponse).toEqual(serverError(new ServerError()));
     });
+  });
+
+  test('Deveria retornar um accessToken em caso de sucesso', async () => {
+    const { sut } = makeSut();
+
+    const httpResponse = await sut.handle({
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(ok({ accessToken: 'access_token' }));
   });
 });

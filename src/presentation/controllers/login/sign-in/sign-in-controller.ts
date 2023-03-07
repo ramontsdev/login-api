@@ -5,7 +5,7 @@ import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { NotFoundError } from '../../../errors/not-found-error';
 import { ServerError } from '../../../errors/server-error';
-import { badRequest, notFound, serverError } from '../../../helpers/http-helpers';
+import { badRequest, notFound, ok, serverError } from '../../../helpers/http-helpers';
 import { Controller } from '../../../protocols/controller';
 import { HttpRequest, HttpResponse } from '../../../protocols/http';
 
@@ -17,8 +17,6 @@ export class SignInController implements Controller {
     private readonly authenticator: Authenticator
   ) { }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
       const requiredFields = ['email', 'password'];
@@ -40,7 +38,9 @@ export class SignInController implements Controller {
         return badRequest(new InvalidParamError('password'));
       }
 
-      await this.authenticator.auth(account.id);
+      const accessToken = await this.authenticator.auth(account.id);
+
+      return ok({ accessToken });
     } catch (error) {
       return serverError(new ServerError());
     }

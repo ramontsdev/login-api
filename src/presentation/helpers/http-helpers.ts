@@ -34,3 +34,10 @@ export function notFound(error: Error): HttpResponse {
     body: error
   };
 }
+
+export function ok(data: any): HttpResponse {
+  return {
+    statusCode: 200,
+    body: data
+  };
+}
