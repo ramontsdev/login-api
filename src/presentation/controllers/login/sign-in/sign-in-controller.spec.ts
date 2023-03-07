@@ -1,3 +1,4 @@
+import { HashComparer } from '../../../../data/protocols/cryptography/hash-comparer';
 import { AccountModel } from '../../../../domain/models/account-model';
 import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
 import { MissingParamError } from '../../../errors/missing-param-error';
@@ -21,12 +22,24 @@ function makeGetAccountByEmail() {
   return new GetAccountByEmailStub();
 }
 
+function makeHashComparer() {
+  class HashComparerStub implements HashComparer {
+    async comparer(value: string, hash: string) {
+      return true;
+    }
+  }
+
+  return new HashComparerStub();
+}
+
 function makeSut() {
   const getAccountByEmailStub = makeGetAccountByEmail();
-  const sut = new SignInController(getAccountByEmailStub);
+  const hashComparerStub = makeHashComparer();
+  const sut = new SignInController(getAccountByEmailStub, hashComparerStub);
   return {
     sut,
-    getAccountByEmailStub
+    getAccountByEmailStub,
+    hashComparerStub
   };
 }
 
@@ -84,5 +97,19 @@ describe('SignIn Controller', () => {
     });
 
     expect(httpResponse).toEqual(notFound(new NotFoundError('any_email@mail.com')));
+  });
+
+  test('Deveria chamar o HashComparer com os valores corretos', async () => {
+    const { sut, hashComparerStub } = makeSut();
+    jest.spyOn(hashComparerStub, 'comparer');
+
+    await sut.handle({
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      }
+    });
+
+    expect(hashComparerStub.comparer).toBeCalledWith('any_password', 'hashed_password');
   });
 });
