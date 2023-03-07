@@ -1,6 +1,7 @@
 import { HashComparer } from '../../../../data/protocols/cryptography/hash-comparer';
 import { AccountModel } from '../../../../domain/models/account-model';
 import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
+import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { NotFoundError } from '../../../errors/not-found-error';
 import { badRequest, notFound } from '../../../helpers/http-helpers';
@@ -111,5 +112,22 @@ describe('SignIn Controller', () => {
     });
 
     expect(hashComparerStub.comparer).toBeCalledWith('any_password', 'hashed_password');
+  });
+
+  test('Deveria retornar 400 se o HashComparer retornar false', async () => {
+    const { sut, hashComparerStub } = makeSut();
+    jest.spyOn(hashComparerStub, 'comparer')
+      .mockReturnValueOnce(
+        new Promise(resolve => resolve(false))
+      );
+
+    const httpResponse = await sut.handle({
+      body: {
+        email: 'any_email@mail.com',
+        password: 'any_password'
+      }
+    });
+
+    expect(httpResponse).toEqual(badRequest(new InvalidParamError('password')));
   });
 });

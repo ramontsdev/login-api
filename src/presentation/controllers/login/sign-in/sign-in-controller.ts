@@ -1,5 +1,6 @@
 import { HashComparer } from '../../../../data/protocols/cryptography/hash-comparer';
 import { GetAccountByEmail } from '../../../../domain/use-cases/get-account-by-email';
+import { InvalidParamError } from '../../../errors/invalid-param-error';
 import { MissingParamError } from '../../../errors/missing-param-error';
 import { NotFoundError } from '../../../errors/not-found-error';
 import { badRequest, notFound } from '../../../helpers/http-helpers';
@@ -30,6 +31,9 @@ export class SignInController implements Controller {
       return notFound(new NotFoundError(email));
     }
 
-    await this.hashComparer.comparer(password, account.password);
+    const isValidPassword = await this.hashComparer.comparer(password, account.password);
+    if (!isValidPassword) {
+      return badRequest(new InvalidParamError('password'));
+    }
   }
 }
