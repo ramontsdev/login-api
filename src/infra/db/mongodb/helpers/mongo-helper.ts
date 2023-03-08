@@ -21,6 +21,12 @@ class MongoHelper {
 
     return this.client.db().collection<T>(collectionName);
   }
+
+  mapDocument<T>(document: any) {
+    const { _id, ...documentWithoutId } = document;
+    const mappedDocument: T = Object.assign({}, documentWithoutId, { id: _id.toString() });
+    return mappedDocument;
+  }
 }
 
 export const mongoUri = process.env.MONGO_URL || 'mongodb://localhost:27017/auth-login-api';
