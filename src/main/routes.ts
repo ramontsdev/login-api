@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { adaptRoute } from './factories/adapters/express-route-adapter';
+
+import { adaptRoute } from './adapters/express-route-adapter';
 import { makeSignUpControllerFactory } from './factories/controllers/sign-up-controller-factory';
 
 export const routes = Router();
