@@ -51,7 +51,7 @@ describe('DbCreateAccount use case', () => {
       password: 'any_password'
     });
 
-    expect(hasherStub.hash).toBeCalledWith('any_email@mail.com');
+    expect(hasherStub.hash).toBeCalledWith('any_password');
   });
 
   test('Deveria lançar erro se Hasher.hash lançar um erro', async () => {

@@ -12,7 +12,7 @@ export class DbCreateAccount implements CreateAccount {
   ) { }
 
   async create(accountData: CreateAccountModel): Promise<AccountModel> {
-    const hash = await this.hasher.hash(accountData.email);
+    const hash = await this.hasher.hash(accountData.password);
     const account = await this.createAccountRepository.create({
       ...accountData,
       password: hash
