@@ -1,10 +1,11 @@
 import express, { json } from 'express';
-import { mongoHelper, mongoUri } from '../infra/db/mongodb/helpers/mongo-helper';
+import { mongoHelper } from '../infra/db/mongodb/helpers/mongo-helper';
+import { environment } from './environment';
 import { loginRoutes } from './routes/login-routes';
 
 export const server = express();
 
-mongoHelper.connect(mongoUri)
+mongoHelper.connect(environment.mongoUrl)
   .then(() => {
 
     server.use(json());

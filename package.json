@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/main/server.ts",
-    "test": "jest --watch --noStackTrace"
+    "test": "jest --watch --silent --noStackTrace"
   },
   "keywords": [],
   "author": "",
