@@ -16,7 +16,7 @@ describe('Jwt Adapter', () => {
 
     await sut.encrypt('any_value');
 
-    expect(jwt.sign).toBeCalledWith('any_value', 'secret');
+    expect(jwt.sign).toBeCalledWith({ id: 'any_value' }, 'secret');
   });
 
   test('Deveria lançar erro se o sign lançar um erro', async () => {

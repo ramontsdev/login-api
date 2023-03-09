@@ -1,10 +1,10 @@
 import { DbCreateAccount } from '../../../data/use-cases/account/db-create-account';
 import { DbGetAccountByEmail } from '../../../data/use-cases/account/db-get-account-by-email';
 import { Authentication } from '../../../infra/authentication/authentication';
+import { BcryptAdapter } from '../../../infra/cryptography/bcrypt-adapter';
 import { JwtAdapter } from '../../../infra/cryptography/jwt-adapter';
 import { AccountMongoRepository } from '../../../infra/db/mongodb/account-repository/account-mongo-repository';
 import { SignUpController } from '../../../presentation/controllers/login/sign-up/sign-up-controller';
-import { BcryptAdapter } from '../../adapters/bcrypt-adapter';
 import { EmailValidatorAdapter } from '../../adapters/email-validator-adapter';
 
 export function makeSignUpController() {
