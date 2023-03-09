@@ -33,7 +33,7 @@ export class SignInController implements Controller {
         return notFound(new NotFoundError(email));
       }
 
-      const isValidPassword = await this.hashComparer.comparer(password, account.password);
+      const isValidPassword = await this.hashComparer.compare(password, account.password);
       if (!isValidPassword) {
         return badRequest(new InvalidParamError('password'));
       }

@@ -27,7 +27,7 @@ function makeGetAccountByEmail() {
 
 function makeHashComparer() {
   class HashComparerStub implements HashComparer {
-    async comparer(value: string, hash: string) {
+    async compare(value: string, hash: string) {
       return true;
     }
   }
@@ -136,7 +136,7 @@ describe('SignIn Controller', () => {
   describe('HashComparer', () => {
     test('Deveria chamar o HashComparer com os valores corretos', async () => {
       const { sut, hashComparerStub } = makeSut();
-      jest.spyOn(hashComparerStub, 'comparer');
+      jest.spyOn(hashComparerStub, 'compare');
 
       await sut.handle({
         body: {
@@ -145,12 +145,12 @@ describe('SignIn Controller', () => {
         }
       });
 
-      expect(hashComparerStub.comparer).toBeCalledWith('any_password', 'hashed_password');
+      expect(hashComparerStub.compare).toBeCalledWith('any_password', 'hashed_password');
     });
 
     test('Deveria retornar 400 se o HashComparer retornar false', async () => {
       const { sut, hashComparerStub } = makeSut();
-      jest.spyOn(hashComparerStub, 'comparer')
+      jest.spyOn(hashComparerStub, 'compare')
         .mockReturnValueOnce(
           new Promise(resolve => resolve(false))
         );
@@ -167,7 +167,7 @@ describe('SignIn Controller', () => {
 
     test('Deveria retornar statusCode 500 se o HashComparer lançar um erro', async () => {
       const { sut, hashComparerStub } = makeSut();
-      jest.spyOn(hashComparerStub, 'comparer')
+      jest.spyOn(hashComparerStub, 'compare')
         .mockReturnValueOnce(
           new Promise((resolve, reject) => reject(new Error()))
         );
