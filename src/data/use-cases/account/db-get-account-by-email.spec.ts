@@ -1,3 +1,5 @@
+import MockDate from 'mockdate';
+
 import { AccountModel } from '../../../domain/models/account-model';
 import { GetAccountByEmailRepository } from '../../protocols/db/get-account-by-email-repository';
 import { DbGetAccountByEmail } from './db-get-account-by-email';
@@ -9,7 +11,8 @@ function makeGetAccountByEmailRepository() {
         id: 'valid_id',
         email: 'valid_email@mail.com',
         name: 'valid_name',
-        password: 'valid_password'
+        password: 'valid_password',
+        createdAt: new Date()
       };
     }
   }
@@ -28,6 +31,14 @@ function makeSut() {
 }
 
 describe('DbGetAccountByEmail', () => {
+  beforeAll(() => {
+    MockDate.set(new Date());
+  });
+
+  afterAll(() => {
+    MockDate.reset();
+  });
+
   test('Deveria chamar GetAccountByEmailRepository com o e-mail correto', async () => {
     const { sut, getAccountByEmailRepositoryStub } = makeSut();
 
@@ -60,7 +71,8 @@ describe('DbGetAccountByEmail', () => {
       id: 'valid_id',
       email: 'valid_email@mail.com',
       name: 'valid_name',
-      password: 'valid_password'
+      password: 'valid_password',
+      createdAt: new Date()
     });
   });
 });

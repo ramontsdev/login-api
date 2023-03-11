@@ -1,3 +1,5 @@
+import MockDate from 'mockdate';
+
 import { AccountModel } from '../../../domain/models/account-model';
 import { CreateAccountModel } from '../../../domain/models/create-account-model';
 import { Hasher } from '../../protocols/cryptography/hasher';
@@ -21,7 +23,8 @@ function makeCreateAccountRepository() {
         id: 'any_id',
         name: 'any_name',
         email: 'any_email@mail.com',
-        password: 'any_password'
+        password: 'any_password',
+        createdAt: new Date()
       };
     }
   }
@@ -41,6 +44,14 @@ function makeSut() {
 }
 
 describe('DbCreateAccount use case', () => {
+  beforeAll(() => {
+    MockDate.set(new Date());
+  });
+
+  afterAll(() => {
+    MockDate.reset();
+  });
+
   test('Deveria chamar o Hasher.hash com o valor correto', () => {
     const { sut, hasherStub } = makeSut();
     jest.spyOn(hasherStub, 'hash');
@@ -48,7 +59,7 @@ describe('DbCreateAccount use case', () => {
     sut.create({
       name: 'any_name',
       email: 'any_email@mail.com',
-      password: 'any_password'
+      password: 'any_password',
     });
 
     expect(hasherStub.hash).toBeCalledWith('any_password');
@@ -118,7 +129,8 @@ describe('DbCreateAccount use case', () => {
       id: 'any_id',
       name: 'any_name',
       email: 'any_email@mail.com',
-      password: 'any_password'
+      password: 'any_password',
+      createdAt: new Date()
     });
   });
 });
