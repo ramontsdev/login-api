@@ -40,7 +40,7 @@ describe('AccountMongo Repository', () => {
     test('Deveria retornar uma conta em caso de sucesso', async () => {
       const sut = new AccountMongoRepository();
 
-      await accountCollection.insertOne({
+      await sut.create({
         name: 'any_name',
         email: 'any_email@mail.com',
         password: 'any_password'

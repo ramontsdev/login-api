@@ -24,7 +24,8 @@ class MongoHelper {
 
   mapDocument<T>(document: any) {
     const { _id, ...documentWithoutId } = document;
-    const mappedDocument: T = Object.assign({}, documentWithoutId, { id: _id.toString() });
+    _id;
+    const mappedDocument: T = Object.assign({}, documentWithoutId);
     return mappedDocument;
   }
 }
