@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@shelf/jest-mongodb": "^4.1.7",
     "@types/bcrypt": "^5.0.0",
